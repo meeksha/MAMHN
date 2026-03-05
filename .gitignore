@@ -1,0 +1,5 @@
+*.npy
+*.csv
+*.pt
+*.joblib
+__pycache__/
