@@ -1,134 +1,298 @@
-# Memory-Augmented Meta-Hypernetwork for Adaptive Anomaly Detection on Edge Devices
+# Memory-Augmented Meta-Hypernetwork (MAMHN) for Adaptive Anomaly Detection in Industrial IoT Systems
 
 ## Overview
 
-Edge and IoT devices continuously generate telemetry data from sensors and network systems. Detecting anomalies in such environments is challenging because device behavior and network traffic patterns change over time. Traditional anomaly detection models often fail when the underlying data distribution shifts.
+Industrial Internet of Things (IIoT) environments generate continuous streams of sensor data from critical infrastructure such as water treatment plants, manufacturing systems, and industrial monitoring equipment. Detecting anomalous behaviour in these systems is challenging because operational patterns evolve over time due to environmental changes, equipment degradation, concept drift, and cyber-attacks.
 
-This project implements an adaptive anomaly detection system that combines a **hypernetwork**, a **memory module**, and **meta-learning** to dynamically adapt anomaly detection models to changing IoT data patterns.
+This project proposes a **Memory-Augmented Meta-Hypernetwork (MAMHN)** framework for adaptive anomaly detection in industrial time-series data. The architecture combines temporal memory learning, dynamic parameter generation, and adaptive classification to improve anomaly detection performance while maintaining computational efficiency suitable for edge deployment.
 
-The system processes IoT telemetry data, retrieves past patterns from memory, and dynamically generates model parameters to improve anomaly detection performance.
+The proposed framework consists of three primary components:
 
----
+* **Memory Module (LSTM-Based)** for capturing temporal behavioural patterns.
+* **Meta-Hypernetwork** for generating context-aware dynamic parameters.
+* **Adaptive Main Network** for anomaly classification.
 
-## Dataset
-
-This project uses **IoT telemetry datasets inspired by the TON_IoT framework**, which simulate sensor data from IoT environments such as weather monitoring systems and device telemetry.
-
-The dataset includes multiple numerical features representing IoT sensor behavior. Artificial spikes and abnormal patterns are introduced to simulate anomaly conditions.
-
-Example dataset files used during experimentation:
-
-* IoT_Fake_16features.csv
-* IoT_Fake_16features_Spiked.csv
-* IoT_Garage_Spiked.csv
-* IoT_Garage_Spiked_Renamed.csv
-* IoT_Weather_Fake.csv
-
-During preprocessing, the dataset is converted into training, validation, and testing arrays.
-
-Feature scaling is performed using **MinMaxScaler**, which is stored as:
-
-* minmax_scaler.joblib
+The system is designed to adapt to changing operational conditions without requiring complete retraining, making it suitable for Industrial IoT and edge computing applications.
 
 ---
 
-## Methodology
+## Architecture
 
-The anomaly detection framework is composed of three main components.
+```text
+Industrial Sensor Data
+            │
+            ▼
+   Data Preprocessing
+            │
+            ▼
+ Sliding Window Generation
+            │
+            ▼
+     Memory Module (LSTM)
+            │
+            ▼
+      Meta-Hypernetwork
+            │
+            ▼
+   Adaptive Main Network
+            │
+            ▼
+      Anomaly Prediction
+```
 
-### Hypernetwork
+---
 
-A hypernetwork is a neural network that generates the weights of another neural network. Instead of using a static anomaly detection model, the hypernetwork dynamically produces model parameters based on the current data distribution.
+## Key Features
+
+* Memory-augmented temporal learning
+* Dynamic parameter generation using hypernetworks
+* Adaptive anomaly classification
+* Few-shot adaptation capability
+* Industrial time-series analysis
+* Edge deployment suitability
+* Lightweight architecture compared to transformer-based approaches
+
+---
+
+## Datasets
+
+### 1. SWaT (Secure Water Treatment) Dataset
+
+The SWaT dataset contains multivariate sensor and actuator measurements collected from a scaled-down operational water treatment plant. The dataset includes both normal operation and cyber-attack scenarios.
+
+Key characteristics:
+
+* Industrial control system data
+* Multiple sensors and actuators
+* Real attack scenarios
+* Widely used anomaly detection benchmark
+
+### 2. Pump Sensor Dataset
+
+The Pump Sensor Dataset contains industrial sensor measurements collected from pump monitoring systems operating under normal and faulty conditions.
+
+Key characteristics:
+
+* Multivariate sensor measurements
+* Predictive maintenance applications
+* Equipment fault detection
+* Industrial time-series analysis
+
+---
+
+## Data Preprocessing
+
+The following preprocessing operations were performed:
+
+* Missing value handling
+* Feature normalization using Min-Max Scaling
+* Sliding window generation
+* Tensor conversion for deep learning models
+* Train-test dataset partitioning
+
+Example normalization method:
+
+```python
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+
+X_scaled = scaler.fit_transform(X)
+```
+
+---
+
+## Model Components
 
 ### Memory Module
 
-The memory module stores representations of previously observed data patterns. When new input data is processed, the system retrieves similar patterns from memory to improve prediction.
+The Memory Module is implemented using a Long Short-Term Memory (LSTM) network.
 
-### Meta-Learning
+Responsibilities:
 
-Meta-learning allows the system to learn how to adapt quickly to new environments with minimal retraining.
+* Capture temporal dependencies
+* Generate contextual memory representations
+* Preserve behavioural history
+* Support adaptive learning
 
-### System Pipeline
+### Meta-Hypernetwork
 
-IoT Telemetry Data
-→ Data Preprocessing and Scaling
-→ Memory Module
-→ Meta-Hypernetwork
-→ Adaptive Anomaly Detection Model
-→ Prediction (Normal or Anomaly)
+The Meta-Hypernetwork receives contextual representations generated by the Memory Module and produces dynamic parameter vectors.
+
+Responsibilities:
+
+* Context-aware parameter generation
+* Adaptive model behaviour
+* Improved generalization
+* Reduced retraining requirements
+
+### Adaptive Main Network
+
+The Adaptive Main Network performs anomaly classification using dynamically generated parameters.
+
+Responsibilities:
+
+* Binary anomaly classification
+* Probability estimation
+* Final anomaly prediction
+
+---
+
+## Technologies Used
+
+### Programming Language
+
+* Python
+
+### Deep Learning Framework
+
+* PyTorch
+
+### Data Processing Libraries
+
+* NumPy
+* Pandas
+* Scikit-Learn
+
+### Visualization
+
+* Matplotlib
+* Seaborn
+
+### Development Environment
+
+* Google Colab
+* NVIDIA T4 GPU
+
+---
+
+## Training Configuration
+
+The model was trained using:
+
+```python
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=0.001
+)
+```
+
+Training pipeline:
+
+1. Forward Propagation
+2. Loss Computation
+3. Backpropagation
+4. Parameter Optimization
+
+---
+
+## Performance Results
+
+| Metric    | Value  |
+| --------- | ------ |
+| Accuracy  | 90.59% |
+| Precision | 90.21% |
+| Recall    | 98.29% |
+| F1-Score  | 94.08% |
+
+### Confusion Matrix
+
+|                | Predicted Normal | Predicted Anomaly |
+| -------------- | ---------------- | ----------------- |
+| Actual Normal  | 2270             | 1161              |
+| Actual Anomaly | 186              | 10697             |
+
+The results demonstrate strong anomaly detection capability with particularly high recall, indicating that the framework successfully identifies the majority of anomalous events.
+
+---
+
+## Comparison with Existing Approaches
+
+### TranAD
+
+TranAD utilizes transformer-based self-attention mechanisms for anomaly detection in multivariate time-series data.
+
+Advantages:
+
+* Strong anomaly detection performance
+
+Limitations:
+
+* High computational overhead
+* Increased memory consumption
+* Less suitable for resource-constrained edge devices
+
+### TimesNet
+
+TimesNet transforms time-series signals into two-dimensional representations and applies convolution-based learning.
+
+Advantages:
+
+* High predictive performance
+
+Limitations:
+
+* Computationally intensive
+* Increased deployment complexity on edge systems
+
+### Proposed MAMHN
+
+Advantages:
+
+* Adaptive parameter generation
+* Lower computational complexity
+* Memory-guided learning
+* Edge deployment suitability
+* Few-shot adaptation capability
 
 ---
 
 ## Project Structure
 
-app.py
-Main application used to run the anomaly detection system.
-
-experiment_summary.json
-Contains training results and experiment metrics.
-
-retrain_summary.json
-Contains retraining experiment results.
-
-.gitignore
-Specifies files and directories ignored by Git.
-
-README.md
-Project documentation.
-
----
-
-## Installation
-
-Clone the repository:
-
-git clone https://github.com/meeksha/MAMHN.git
-
-Move into the project directory:
-
-cd MAMHN
-
-Install required Python libraries:
-
-pip install numpy pandas torch scikit-learn joblib flask
-
----
-
-## Running the Project
-
-Run the anomaly detection system using:
-
-python app.py
-
-The system will load the trained models, preprocess IoT telemetry data, generate adaptive detector parameters using the hypernetwork, and classify anomalies.
-
----
-
-## Applications
-
-This approach can be applied in several real-world scenarios:
-
-* IoT security monitoring
-* industrial sensor anomaly detection
-* smart home monitoring systems
-* edge computing environments
-* infrastructure monitoring systems
+```text
+MAMHN/
+│
+├── notebooks/
+│   └── MAMHN_Training.ipynb
+│
+├── datasets/
+│   ├── SWaT/
+│   └── PumpSensor/
+│
+├── results/
+│   ├── confusion_matrix.png
+│   ├── metrics.png
+│   └── training_curves.png
+│
+├── report/
+│   └── Project_Report.pdf
+│
+├── requirements.txt
+│
+└── README.md
+```
 
 ---
 
 ## Future Work
 
-Potential improvements for the system include:
+Potential extensions include:
 
-* real-time streaming anomaly detection
-* deployment on edge hardware devices
-* continual learning for long-term adaptation
-* integration with distributed IoT monitoring systems
+* Federated Learning Integration
+* Online Continual Learning
+* Memory Optimization Strategies
+* Model Compression and Quantization
+* Real-Time Edge Deployment
+* Hybrid Attention-Based Architectures
 
 ---
 
 ## Author
 
-A S Sameeksha
-B.E Artificial Intelligence and Data Science
-Siddaganga Institute of Technology
+**A. S. Sameeksha**
+
+Bachelor of Engineering (Artificial Intelligence and Data Science)
+
+Siddaganga Institute of Technology, Tumakuru
+
+2025–2026
